@@ -79,7 +79,7 @@ export function useUserWebSocket() {
         .then(({ data, error }) => {
           if (disposed) return;
           if (error && error.status !== 401) throw error;
-          if (data?.user.id === userId) connect();
+          if (data?.user?.id === userId) connect();
           else leaveSession();
         })
         .catch(() => {
