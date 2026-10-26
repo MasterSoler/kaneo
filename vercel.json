@@ -4,5 +4,11 @@
 	"buildCommand": "pnpm run build:dependencies && pnpm --filter @kaneo/web build",
 	"outputDirectory": "apps/web/dist",
 	"framework": "vite",
-	"rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+	"rewrites": [
+		{
+			"source": "/api/:match*",
+			"destination": "https://kaneo-api-oweb.fly.dev/api/:match*"
+		},
+		{ "source": "/(.*)", "destination": "/index.html" }
+	]
 }

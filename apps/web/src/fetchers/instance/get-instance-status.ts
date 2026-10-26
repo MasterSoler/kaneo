@@ -21,5 +21,12 @@ export async function getInstanceStatus(): Promise<InstanceStatus> {
       error,
     );
   }
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    throw new HttpError(
+      502,
+      "Instance API returned a non-JSON response. Check VITE_API_URL and that the Kaneo API is deployed.",
+    );
+  }
   return response.json();
 }
