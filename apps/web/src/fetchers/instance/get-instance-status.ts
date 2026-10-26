@@ -1,5 +1,10 @@
 import { resolveApiBaseUrl } from "@kaneo/libs";
+import {
+  INSTANCE_API_UNREACHABLE,
+  isVercelProxyUpstreamMissing,
+} from "@/lib/api-reachability";
 import { HttpError } from "@/lib/http-error";
+import { parseApiErrorBody } from "@/lib/parse-api-error-body";
 
 export type InstanceStatus = {
   hasUsers: boolean;
@@ -11,22 +16,24 @@ export async function getInstanceStatus(): Promise<InstanceStatus> {
   const response = await fetch(`${baseUrl}/instance/status`, {
     credentials: "include",
   });
+  const bodyText = await response.text().catch(() => "");
   if (!response.ok) {
-    // Surface the server's error body when available so the UI can
-    // distinguish "instance unreachable" from other failures.
-    const error = await HttpError.fromResponse(response);
-    throw new HttpError(
-      response.status,
-      `Failed to fetch instance status: ${error.message}`,
-      error,
-    );
+    if (response.status === 502 && isVercelProxyUpstreamMissing(bodyText)) {
+      throw new HttpError(response.status, "Instance API is unreachable", {
+        code: INSTANCE_API_UNREACHABLE,
+      });
+    }
+    const parsed = parseApiErrorBody(bodyText);
+    const message =
+      (parsed ? parsed.message : bodyText).trim() ||
+      `Failed to fetch instance status (${response.status})`;
+    throw new HttpError(response.status, message, parsed ?? {});
   }
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
-    throw new HttpError(
-      502,
-      "Instance API returned a non-JSON response. Check VITE_API_URL and that the Kaneo API is deployed.",
-    );
+    throw new HttpError(502, "Instance API returned a non-JSON response", {
+      code: INSTANCE_API_UNREACHABLE,
+    });
   }
-  return response.json();
+  return JSON.parse(bodyText) as InstanceStatus;
 }

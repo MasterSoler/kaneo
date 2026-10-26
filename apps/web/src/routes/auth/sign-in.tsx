@@ -35,6 +35,10 @@ import PageTitle from "@/components/page-title";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import useGetConfig from "@/hooks/queries/config/use-get-config";
 import useInstanceStatus from "@/hooks/queries/instance/use-instance-status";
+import {
+  instanceApiUnreachableMessage,
+  isInstanceApiUnreachable,
+} from "@/lib/api-reachability";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "@/lib/toast";
 
@@ -96,15 +100,19 @@ function SignIn() {
     }
   }, [instanceStatus, navigate]);
 
+  const instanceStatusMessage = isInstanceStatusError
+    ? isInstanceApiUnreachable(instanceStatusError)
+      ? instanceApiUnreachableMessage(t)
+      : instanceStatusError instanceof Error
+        ? instanceStatusError.message
+        : t("auth:signIn.instanceStatusError")
+    : null;
+
   useEffect(() => {
-    if (isInstanceStatusError) {
-      toast.error(
-        instanceStatusError instanceof Error
-          ? instanceStatusError.message
-          : t("auth:signIn.instanceStatusError"),
-      );
-    }
-  }, [isInstanceStatusError, instanceStatusError, t]);
+    if (!isInstanceStatusError || !instanceStatusMessage) return;
+    if (isInstanceApiUnreachable(instanceStatusError)) return;
+    toast.error(instanceStatusMessage);
+  }, [isInstanceStatusError, instanceStatusError, instanceStatusMessage]);
 
   const signInWithSso = useCallback(async () => {
     const started = await signInWithProvider("custom");
@@ -159,8 +167,14 @@ function SignIn() {
         title={t("auth:signIn.heading")}
         description={t(getSignInSubtitleKey(emailMethod, providers))}
         notice={
-          errorMessage || invitationId ? (
+          errorMessage || instanceStatusMessage || invitationId ? (
             <>
+              {instanceStatusMessage ? (
+                <Alert variant="error">
+                  <CircleAlert />
+                  <AlertDescription>{instanceStatusMessage}</AlertDescription>
+                </Alert>
+              ) : null}
               {errorMessage ? (
                 <Alert variant="error">
                   <CircleAlert />

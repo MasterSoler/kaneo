@@ -728,6 +728,9 @@
 						"instanceStatusError": {
 							"type": "string"
 						},
+						"apiBackendUnreachable": {
+							"type": "string"
+						},
 						"heading": {
 							"type": "string"
 						},
@@ -816,6 +819,7 @@
 						"guestError",
 						"errors",
 						"instanceStatusError",
+						"apiBackendUnreachable",
 						"heading",
 						"submitPassword",
 						"invitation",
@@ -973,6 +977,9 @@
 						"instanceStatusError": {
 							"type": "string"
 						},
+						"apiBackendUnreachable": {
+							"type": "string"
+						},
 						"instanceAdminTitle": {
 							"type": "string"
 						},
@@ -1022,6 +1029,7 @@
 						"toggleMessage",
 						"toggleLink",
 						"instanceStatusError",
+						"apiBackendUnreachable",
 						"instanceAdminTitle",
 						"instanceAdminSubtitle",
 						"heading",
