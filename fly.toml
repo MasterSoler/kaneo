@@ -1,0 +1,17 @@
+# OWeb satellite API: bundled Kaneo image (API + bundled web). Vercel serves the
+# static web app; proxy /api from vercel.json to this app.
+app = "kaneo-api-oweb"
+primary_region = "iad"
+
+[build]
+image = "ghcr.io/usekaneo/kaneo:latest"
+
+[http_service]
+internal_port = 5173
+force_https = true
+auto_stop_machines = "stop"
+auto_start_machines = true
+min_machines_running = 0
+
+[env]
+KANEO_CLIENT_URL = "https://kaneo-oweb.vercel.app"
