@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_layout/_authenticated")({
       // unknown. Don't conflate with "no session" (unauthenticated): let
       // children decide whether to skip active-organization mutations.
     }
-    if (!session && !sessionError) {
+    if (!session) {
       throw redirect({
         to: "/auth/sign-in",
         search: {
