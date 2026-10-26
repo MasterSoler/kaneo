@@ -5,7 +5,7 @@ import {
   useRouter,
   useSearch,
 } from "@tanstack/react-router";
-import { Info } from "lucide-react";
+import { CircleAlert, Info } from "lucide-react";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { z } from "zod/v4";
@@ -35,6 +35,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getConfig } from "@/fetchers/config/get-config";
 import useGetConfig from "@/hooks/queries/config/use-get-config";
 import useInstanceStatus from "@/hooks/queries/instance/use-instance-status";
+import {
+  instanceApiUnreachableMessage,
+  isInstanceApiUnreachable,
+} from "@/lib/api-reachability";
 import { toast } from "@/lib/toast";
 
 const signUpSearchSchema = z.object({
@@ -65,15 +69,19 @@ function SignUp() {
     error: instanceStatusError,
   } = useInstanceStatus();
 
+  const instanceStatusMessage = isInstanceStatusError
+    ? isInstanceApiUnreachable(instanceStatusError)
+      ? instanceApiUnreachableMessage(t, "signUp")
+      : instanceStatusError instanceof Error
+        ? instanceStatusError.message
+        : t("auth:signUp.instanceStatusError")
+    : null;
+
   useEffect(() => {
-    if (isInstanceStatusError) {
-      toast.error(
-        instanceStatusError instanceof Error
-          ? instanceStatusError.message
-          : t("auth:signUp.instanceStatusError"),
-      );
-    }
-  }, [isInstanceStatusError, instanceStatusError, t]);
+    if (!isInstanceStatusError || !instanceStatusMessage) return;
+    if (isInstanceApiUnreachable(instanceStatusError)) return;
+    toast.error(instanceStatusMessage);
+  }, [isInstanceStatusError, instanceStatusError, instanceStatusMessage]);
 
   const invitationId = search.invitationId;
   const isInstanceAdminSetup = instanceStatus?.hasUsers === false;
@@ -107,19 +115,33 @@ function SignUp() {
         ? t("auth:signUp.subtitle.password")
         : t("auth:signUp.subtitle.providers");
 
-  const notice = invitationId ? (
-    <InvitationNotice
-      invitationId={invitationId}
-      description={t("auth:signUp.invitation.description")}
-    />
-  ) : config?.disableRegistration && !isInstanceAdminSetup ? (
-    <Alert role="note">
-      <Info />
-      <AlertDescription>
-        {t("auth:signUp.registrationDisabledAlert")}
-      </AlertDescription>
-    </Alert>
-  ) : null;
+  const notice =
+    instanceStatusMessage ||
+    invitationId ||
+    (config?.disableRegistration && !isInstanceAdminSetup) ? (
+      <>
+        {instanceStatusMessage ? (
+          <Alert variant="error">
+            <CircleAlert />
+            <AlertDescription>{instanceStatusMessage}</AlertDescription>
+          </Alert>
+        ) : null}
+        {invitationId ? (
+          <InvitationNotice
+            invitationId={invitationId}
+            description={t("auth:signUp.invitation.description")}
+          />
+        ) : null}
+        {config?.disableRegistration && !isInstanceAdminSetup ? (
+          <Alert role="note">
+            <Info />
+            <AlertDescription>
+              {t("auth:signUp.registrationDisabledAlert")}
+            </AlertDescription>
+          </Alert>
+        ) : null}
+      </>
+    ) : null;
 
   return (
     <>

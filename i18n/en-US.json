@@ -186,6 +186,7 @@
 				"use_a_permanent_email_address_disposable_addresses_cannot_create_accounts_": "Use a permanent email address. Disposable addresses cannot create accounts."
 			},
 			"instanceStatusError": "Couldn't reach the server. Please retry in a moment.",
+			"apiBackendUnreachable": "The Kaneo API isn't running yet. Deploy the OWeb API backend (Fly app kaneo-api-oweb) and ensure Vercel proxies /api to it — see docs/oweb-satellite.md in the repo.",
 			"heading": "Sign in to Kaneo",
 			"submitPassword": "Sign in",
 			"invitation": {
@@ -249,6 +250,7 @@
 			"toggleMessage": "Already have an account?",
 			"toggleLink": "Sign in",
 			"instanceStatusError": "Couldn't reach the server. Please retry in a moment.",
+			"apiBackendUnreachable": "The Kaneo API isn't running yet. Deploy the OWeb API backend before creating the first account.",
 			"instanceAdminTitle": "Set up your Kaneo instance",
 			"instanceAdminSubtitle": "This account becomes the instance administrator with full access.",
 			"heading": "Create your account",

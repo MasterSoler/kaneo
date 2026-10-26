@@ -1,0 +1,25 @@
+name: Deploy OWeb API to Fly.io
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - fly.toml
+      - .github/workflows/deploy-oweb-fly.yml
+
+concurrency:
+  group: deploy-oweb-fly
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.repository == 'MasterSoler/kaneo'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy kaneo-api-oweb
+        run: flyctl deploy --remote-only --app kaneo-api-oweb
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

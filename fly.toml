@@ -13,5 +13,17 @@ auto_stop_machines = "stop"
 auto_start_machines = true
 min_machines_running = 0
 
+[[http_service.checks]]
+grace_period = "90s"
+interval = "30s"
+method = "GET"
+path = "/api/health"
+timeout = "5s"
+
 [env]
 KANEO_CLIENT_URL = "https://kaneo-oweb.vercel.app"
+
+[[vm]]
+memory = "1gb"
+cpu_kind = "shared"
+cpus = 1
